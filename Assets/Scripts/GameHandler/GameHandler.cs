@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Door;
 using GamePauseUi;
 using Ghosts;
@@ -7,6 +9,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace GameHandler
 {
@@ -25,10 +28,10 @@ namespace GameHandler
         private PlayerController _player;
 
         // Pac-gum
-        private int _pacGumCount;
+        public List<GameObject> pacGumList;
 
         // Timer for scatter and chase
-        public uint[] ghostsModeTimes = { 7, 20, 7, 20, 5, 20, 5 };
+        public uint[] ghostsModeTimes = { 2, 20};
         private int _ghostsModeTimesIndex;
         private float _switcherModeTimer;
         private bool _allTimersPaused;
@@ -76,7 +79,7 @@ namespace GameHandler
             _player = FindObjectOfType<PlayerController>();
             winText.enabled = false;
             gamePausedText.enabled = false;
-            _pacGumCount = GameObject.FindGameObjectsWithTag(TagsConstants.PacGumTag).Length;
+            pacGumList = GameObject.FindGameObjectsWithTag(TagsConstants.PacGumTag).ToList();
             UpdateGhostsMode();
             gamePauseUiHandler.Reset();
             pauseMenuUi.SetActive(false);
@@ -288,10 +291,10 @@ namespace GameHandler
             TogglePause();
         }
 
-        public void DecrementPacGumNumber()
+        public void DecrementPacGumNumber(GameObject gum)
         {
-            _pacGumCount--;
-            if (_pacGumCount <= 0) NextLevel();
+            pacGumList.Remove(gum);
+            if (pacGumList.Count <= 0) NextLevel();
         }
 
         private void NextLevel()

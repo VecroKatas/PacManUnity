@@ -15,12 +15,13 @@ EditorBuildSettings:
     path: Assets/Scenes/LevelSelector.unity
     guid: a5cdd457c758d854ab43a7d8f26e1407
   - enabled: 1
-    path: Assets/Scenes/Levels/CustomLevel1.unity
-    guid: 13a9030f3ef5f6b4eb9a421027db2fa4
-  - enabled: 1
-    path: Assets/Scenes/Levels/OriginalLevel.unity
+    path: Assets/Scenes/Levels/EasyLevel.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/Levels/CustomLevel2.unity
-    guid: e6f9ac97c9980434183daec9bfd414fe
+    path: Assets/Scenes/Levels/HardLevel.unity
+    guid: e60b6f7809fdcd1468067cdd19617117
+  - enabled: 1
+    path: Assets/Scenes/Levels/NormalLevel.unity
+    guid: 167b0666b71ea13449a62ec375aafd39
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0

@@ -25,7 +25,7 @@ namespace Collectibles
             _collider2D.enabled = false;
             _spriteRenderer.enabled = false;
             if (CollectibleAudioHandler.Instance.PlaySound()) _audioSource.Play();
-            GameHandler.GameHandler.Instance.DecrementPacGumNumber();
+            GameHandler.GameHandler.Instance.DecrementPacGumNumber(this.gameObject);
             Destroy(gameObject, 0.5f);
         }
     }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using GameHandler;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
@@ -77,7 +78,7 @@ namespace Ghosts
         public GhostScoreDisplayer ghostScoreDisplayer;
 
 
-        private void Start()
+        protected void Start()
         {
             var pos = transform.position;
 
@@ -98,7 +99,7 @@ namespace Ghosts
             bodyAnimator = GetComponent<Animator>();
         }
 
-        private void FixedUpdate()
+        protected void FixedUpdate()
         {
             switch (_ghostMode)
             {
@@ -204,6 +205,8 @@ namespace Ghosts
                             possibleDirections.RemoveAt(i);
 
                 // Choose a random direction
+                if (possibleDirections.Count == 0) return;
+
                 var randomDirection = possibleDirections[Random.Range(0, possibleDirections.Count)];
 
                 // Set new direction
@@ -229,7 +232,7 @@ namespace Ghosts
             }
         }
 
-        private void LeavingHouse()
+        protected virtual void LeavingHouse()
         {
             if (FollowPath(exitHomeWayPoints, ref _currentWayPointDestinationIndex, runSpeed))
                 SetGhostMode(GhostMode.Scatter, true);
@@ -277,30 +280,21 @@ namespace Ghosts
 
         protected void ChaseTarget(Vector2 targetPos, float speed)
         {
-            var position = (Vector2)transform.position;
+            bool centered = TryMoveToTileCenter(NextTileDestination, speed);
 
-            // Move ghost
-            MoveGhost(position, speed);
-
-            // Check if ghost reached next tile
-            var isCentered = position == NextTileDestination;
-            if (!isCentered)
+            if (!centered)
                 return;
 
-            var possibleDirections = FindPossibleDirections();
-
-            // if two or more possible directions then delete the opposite direction (preventing the ghost from going back)
-            if (possibleDirections.Count > 1)
-                possibleDirections.Where(direction => direction == -_direction).ToList()
-                    .ForEach(direction => possibleDirections.Remove(direction));
-            // for (var i = 0; i < possibleDirections.Count; i++)
-            //     if (possibleDirections[i] == -_direction)
-            //         possibleDirections.RemoveAt(i);
+            var possibleDirections = GetPossibleDirections();
 
             // Calculate the shortest distance to the target
-            CalculateNextTileDestination(possibleDirections, position, targetPos);
+            CalculateNextTileDestination(possibleDirections, transform.position, targetPos);
 
-            // Update animation each tile
+            UpdateAnimation();
+        }
+
+        protected void UpdateAnimation()
+        {
             switch (_ghostMode)
             {
                 case GhostMode.Chase or GhostMode.Scatter:
@@ -312,11 +306,38 @@ namespace Ghosts
             }
         }
 
+        protected bool TryMoveToTileCenter(Vector2 tileCenter, float speed)
+        {
+            var position = (Vector2)transform.position;
+
+            // Move ghost
+            MoveGhost(position, speed);
+
+            // Check if ghost reached next tile
+            var isCentered = position == tileCenter;
+            if (!isCentered)
+                return false;
+
+            return true;
+        }
+
+        protected List<Vector2> GetPossibleDirections()
+        {
+            var possibleDirections = FindPossibleDirections();
+
+            // if two or more possible directions then delete the opposite direction (preventing the ghost from going back)
+            if (possibleDirections.Count > 1)
+                possibleDirections.Where(direction => direction == -_direction).ToList()
+                    .ForEach(direction => possibleDirections.Remove(direction));
+
+            return possibleDirections;
+        }
+
         #endregion
 
         #region Find possible directions and movement sub-functions
 
-        private List<Vector2> FindPossibleDirections()
+        protected List<Vector2> FindPossibleDirections()
         {
             var up = Vector2.up;
             var down = Vector2.down;
@@ -336,7 +357,7 @@ namespace Ghosts
             return possibleDirections;
         }
 
-        private void CalculateNextTileDestination(List<Vector2> possibleDirections, Vector2 position, Vector2 targetPos)
+        protected void CalculateNextTileDestination(List<Vector2> possibleDirections, Vector2 position, Vector2 targetPos)
         {
             var shortestDistance = float.MaxValue;
             var shortestDirection = Vector2.zero;
@@ -355,7 +376,7 @@ namespace Ghosts
             NextTileDestination = position + _direction;
         }
 
-        private void MoveGhost(Vector2 position, float speed)
+        protected void MoveGhost(Vector2 position, float speed)
         {
             var positionVector = Vector2.MoveTowards(position, NextTileDestination, speed * Time.deltaTime);
             _rigidbody2D.MovePosition(positionVector);
